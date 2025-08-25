@@ -1,8 +1,20 @@
 {
   "name": "apple-docs-mcp-server",
   "version": "1.0.0",
+  "description": "🍎 MCP server for semantic search through Apple developer documentation, WWDC transcripts, and code examples. 16K+ documents indexed for AI agents.",
   "type": "module",
   "main": "server.js",
+  "keywords": ["mcp", "apple", "documentation", "semantic-search", "ai-agent", "cursor", "swift", "ios", "macos", "wwdc", "vector-database"],
+  "author": "bbssppllvv",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bbssppllvv/apple-docs-mcp-server.git"
+  },
+  "homepage": "https://github.com/bbssppllvv/apple-docs-mcp-server",
+  "bugs": {
+    "url": "https://github.com/bbssppllvv/apple-docs-mcp-server/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.4",
     "better-sqlite3": "^11.3.0",

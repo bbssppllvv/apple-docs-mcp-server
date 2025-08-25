@@ -1,37 +1,40 @@
 # Apple Docs MCP Server
 
-🍎 Semantic search through Apple's entire developer documentation - right inside your AI coding assistant.
+Semantic search server for Apple developer documentation with MCP protocol support.
 
-## What is this?
+## What this provides
 
-Ever wished you could just ask your AI assistant about SwiftUI animations or Core Data best practices and get answers from Apple's actual documentation? That's exactly what this does.
+This server gives your AI coding assistant access to Apple's complete developer documentation through semantic search. Instead of browsing developer.apple.com or searching through WWDC transcripts manually, your AI can query the documentation directly and provide accurate, sourced answers.
 
-This MCP server connects Cursor IDE (and other AI tools) to a searchable database of **16,253+ Apple developer documents**, including:
-- All iOS, macOS, watchOS, tvOS, and visionOS docs
-- WWDC session transcripts  
-- Code examples and API references
-- Migration guides and best practices
+**Coverage**: Complete Apple developer documentation including:
+- All current iOS, macOS, watchOS, tvOS, and visionOS documentation
+- WWDC session transcripts (2019-2024)
+- API references for all frameworks
+- Code examples and implementation guides
+- Latest APIs including iOS 18 and macOS Sequoia features
 
-Instead of googling and copy-pasting, your AI can search and reference Apple's official docs directly.
+**Search type**: Semantic/vector search using OpenAI embeddings. This means you can search by concept and context, not just keywords. Ask about "memory management in SwiftUI" and it will find relevant documents even if they don't contain those exact words.
 
-## Quick Start
+**Database size**: 16,253+ documents with full content, regularly updated.
 
-### Install
+## Installation
+
 ```bash
 npm install -g apple-docs-mcp-server
 ```
-The 260MB database downloads automatically during installation.
 
-### Connect to Cursor
+The vector database (~260MB) downloads automatically during installation.
 
-1. **Create the config file**  
-   Add this to `.cursor/mcp.json` in your project root:
+## Setup with Cursor IDE
+
+1. **Add to MCP configuration**  
+   Create or edit `.cursor/mcp.json` in your project root:
    ```json
    {
      "schemaVersion": 1,
      "mcpServers": {
        "apple_docs": {
-         "command": "/path/to/your/apple-docs-mcp-server/run-mcp-safe.sh",
+         "command": "/usr/local/bin/apple-docs-mcp-server/run-mcp-safe.sh",
          "autoStart": true,
          "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
        }
@@ -39,93 +42,100 @@ The 260MB database downloads automatically during installation.
    }
    ```
 
-2. **Find the path**  
+2. **Set up environment**  
+   Create `.env` file with your OpenAI API key:
    ```bash
-   which apple-docs-mcp-server
-   # Use that path + /run-mcp-safe.sh
-   ```
-
-3. **Add your OpenAI key**  
-   Create `.env` file:
-   ```bash
-   OPENAI_API_KEY=your_key_here
+   OPENAI_API_KEY=your_openai_api_key_here
    EMBEDDINGS_DB_PATH=./embeddings.db
    EMBEDDING_MODEL=text-embedding-3-large
    EMBEDDING_DIMENSIONS=3072
    ```
 
+3. **Find correct path**  
+   ```bash
+   npm list -g apple-docs-mcp-server | head -1
+   # Use the path shown + /node_modules/apple-docs-mcp-server/run-mcp-safe.sh
+   ```
+
 4. **Restart Cursor completely**
 
-## How it works
+## How to use
 
-Once connected, your AI assistant can:
+Once connected, your AI assistant can search Apple documentation:
 
-- **Search Apple docs**: "Find SwiftUI animation examples"
-- **Get specific info**: "Show me Core Data CloudKit sync documentation"  
-- **Compare approaches**: "What's the difference between UIKit and SwiftUI navigation?"
-- **Find related topics**: Automatically discovers connected APIs and alternatives
+- "Show me Core Data CloudKit synchronization documentation"
+- "Find SwiftUI @Observable property wrapper examples"
+- "What's new in UIKit for iOS 18?"
+- "Get RealityKit entity component system documentation"
 
-The search is semantic (understands meaning), not just keyword matching, so you can ask questions naturally.
+The AI will search through the documentation, find relevant sections, and provide answers with direct links to Apple's documentation.
 
-## Example Usage
+## Technical details
 
-Ask your AI assistant:
-- "How do I implement custom SwiftUI animations?"
-- "Show me Core Data CloudKit integration examples"  
-- "What's new in iOS 18 for app development?"
-- "Find RealityKit documentation about anchors"
+**Semantic search**: Uses OpenAI's text-embedding-3-large model for vector similarity search. This enables conceptual queries beyond keyword matching.
 
-The AI will search through Apple's docs and give you accurate, up-to-date information with direct links to the official documentation.
+**Document processing**: All documents are preprocessed and embedded for fast retrieval. No API calls during search operations.
 
-## Features
+**Content coverage**:
+- Complete developer.apple.com documentation
+- WWDC session transcripts with timing information  
+- Sample code and implementation examples
+- API reference documentation for all frameworks
+- Migration guides and release notes
 
-- **16,253+ documents** from Apple Developer Documentation
-- **Semantic search** - understands context, not just keywords
-- **Related document discovery** - finds connected topics automatically
-- **Full document access** - complete docs with code examples
-- **Fast responses** - cached database, no API calls during search
-- **Production ready** - error handling, timeouts, proper logging
+**Performance**: Typical search response time under 1 second for semantic queries.
 
 ## Troubleshooting
 
-**Cursor shows "No tools"?**
-- Check that the path in `.cursor/mcp.json` is correct and absolute
-- Make sure you completely restarted Cursor (not just closed the window)
-- Verify the script is executable: `chmod +x run-mcp-safe.sh`
+**"No tools" error in Cursor**:
+- Verify the path in `.cursor/mcp.json` is absolute and correct
+- Ensure `run-mcp-safe.sh` is executable: `chmod +x run-mcp-safe.sh`
+- Restart Cursor completely (not just refresh)
 
-**Search not working?**
-- Check your OpenAI API key in the `.env` file
-- Make sure the `embeddings.db` file downloaded (should be ~260MB)
+**Search returns no results**:
+- Check OpenAI API key in `.env` file
+- Verify `embeddings.db` file exists and is ~260MB
+- Check logs: `tail -f /tmp/apple-docs-mcp.err`
 
-**Path has spaces?**
+**Path contains spaces**:
 ```bash
-# Create a symlink without spaces
-ln -sf "My Folder" MyFolder
-# Use the symlink path in .cursor/mcp.json
+# Create symlink without spaces
+ln -sf "/path/with spaces" /path/without/spaces
+# Use symlink path in .cursor/mcp.json
 ```
 
 ## Development
 
-**Requirements:**
+**Requirements**:
 - Node.js 18+
-- OpenAI API key
+- OpenAI API key with embeddings access
 
-**Local testing:**
+**Local setup**:
 ```bash
 git clone https://github.com/bbssppllvv/apple-docs-mcp-server.git
 cd apple-docs-mcp-server
 npm install
 cp .env.example .env
-# Add your OpenAI key to .env
-./run-mcp-safe.sh
+# Add your OpenAI API key to .env
 ```
+
+**Test server**:
+```bash
+echo '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}' | ./run-mcp-safe.sh
+```
+
+## MCP Tools
+
+The server provides three tools for AI agents:
+
+- `search_docs`: Semantic search through documentation
+- `get_doc`: Retrieve complete document content by ID  
+- `get_stats`: Get database statistics and sample titles
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-This project is licensed under the MIT License, which means you can freely use, modify, and distribute this software for any purpose, including commercial use, as long as you include the original copyright notice.
-
 ---
 
-**Built by developers, for developers.** No affiliation with Apple Inc.
+This is an unofficial tool for accessing Apple developer documentation. No affiliation with Apple Inc.

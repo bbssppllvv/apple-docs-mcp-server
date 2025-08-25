@@ -372,4 +372,6 @@ Common successful setup: API key works → local tests pass → Cursor integrati
 
 ## 📜 License
 
-Production-ready codebase for Apple platform development assistance.
+MIT License - see [LICENSE](LICENSE) file for details.
+
+This project is licensed under the MIT License, which means you can freely use, modify, and distribute this software for any purpose, including commercial use, as long as you include the original copyright notice.

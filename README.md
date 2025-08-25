@@ -36,7 +36,7 @@ cp .env.example .env
 # Add your OPENAI_API_KEY to .env
 ```
 
-**⚠️ Important**: You'll need the `embeddings.db` file (~260MB) from the GitHub releases.
+**✅ Complete**: The embeddings.db file (~260MB) downloads automatically during installation.
 
 ## ⚙️ Configuration
 

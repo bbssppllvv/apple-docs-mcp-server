@@ -142,7 +142,7 @@ For a typical project setup where you installed the package locally:
   "schemaVersion": 1,
   "mcpServers": {
     "apple_docs": {
-      "command": "/Users/your-username/your-project/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
+      "command": "/absolute/path/to/your-project/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
       "autoStart": true,
       "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
     }

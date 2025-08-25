@@ -14,12 +14,29 @@
 
 ## 📦 Installation
 
+### Option 1: NPM Install (Recommended)
 ```bash
+# Install globally for easy access
+npm install -g apple-docs-mcp-server
+
+# Or install locally in your project
+npm install apple-docs-mcp-server
+```
+
+### Option 2: Clone from GitHub  
+```bash
+git clone https://github.com/bbssppllvv/apple-docs-mcp-server.git
 cd apple-docs-mcp-server
 npm install
+```
+
+### Setup Environment
+```bash
 cp .env.example .env
 # Add your OPENAI_API_KEY to .env
 ```
+
+**⚠️ Important**: You'll need the `embeddings.db` file (~260MB) from the GitHub releases.
 
 ## ⚙️ Configuration
 

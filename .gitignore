@@ -1,0 +1,28 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Database files (comment if you want to include embeddings.db)
+embeddings.db
+
+# Log files
+*.log
+*.err
+
+# Node modules
+node_modules/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/

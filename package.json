@@ -1,0 +1,17 @@
+{
+  "name": "apple-docs-mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "openai": "^4.0.0",
+    "p-limit": "^6.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "mcp": "./run-mcp-safe.sh"
+  }
+}

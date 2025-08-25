@@ -53,7 +53,7 @@ EMBEDDING_MODEL=text-embedding-3-large
 EMBEDDING_DIMENSIONS=3072
 ```
 
-⚠️ **Important**: Make sure `embeddings.db` file is present (~260MB). This contains the vector database.
+**Note**: The `embeddings.db` file (~260MB) downloads automatically during installation via the postinstall script.
 
 ## 🔗 Cursor Integration
 
@@ -351,7 +351,7 @@ npm run mcp
 - [ ] Node.js 18+ installed
 - [ ] `npm install` completed successfully  
 - [ ] `.env` file created with valid `OPENAI_API_KEY`
-- [ ] `embeddings.db` file present (~260MB)
+- [ ] `embeddings.db` file downloaded automatically (~260MB)
 - [ ] `chmod +x run-mcp-safe.sh` executed
 - [ ] Local test passes: `./run-mcp-safe.sh` responds to JSON-RPC
 - [ ] `.cursor/mcp.json` created in project root with absolute path

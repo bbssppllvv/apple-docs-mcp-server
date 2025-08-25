@@ -1,0 +1,35 @@
+# Exclude large database file from NPM package
+# (Downloaded via postinstall.js script)
+embeddings.db
+
+# Development files
+.env
+.env.local
+.env.production
+
+# Git files
+.git/
+.gitattributes
+.gitignore
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files
+*.log
+*.err
+
+# Test files
+test/
+tests/
+spec/
+
+# Documentation source
+docs/

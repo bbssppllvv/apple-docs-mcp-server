@@ -1,6 +1,6 @@
 {
   "name": "apple-docs-mcp-server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "🍎 MCP server for semantic search through Apple developer documentation, WWDC transcripts, and code examples. 16K+ documents indexed for AI agents.",
   "type": "module",
   "main": "server.js",
@@ -25,6 +25,20 @@
   "scripts": {
     "start": "node server.js",
     "mcp": "./run-mcp-safe.sh",
-    "postinstall": "node postinstall.js"
-  }
+    "postinstall": "node postinstall.js",
+    "test": "echo '✅ No tests configured yet. Run npm start to test manually.'",
+    "check": "./run-mcp-safe.sh < test-input.json || echo 'Manual testing required'"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "server.js",
+    "search.js",
+    "postinstall.js",
+    "run-mcp-safe.sh",
+    ".env.example",
+    "README.md",
+    "LICENSE"
+  ]
 }

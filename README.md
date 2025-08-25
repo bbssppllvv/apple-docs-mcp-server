@@ -53,14 +53,31 @@ The documentation database (~260MB) downloads automatically during installation.
    }
    ```
 
-2. **Set up your environment**  
-   Create `.env` file with your OpenAI API key:
-```bash
+2. **Choose your configuration method**
+
+   **Option A: Environment variables in mcp.json (recommended):**
+   ```json
+   {
+     "schemaVersion": 1,
+     "mcpServers": {
+       "apple_docs": {
+         "command": "/absolute/path/to/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
+         "env": {
+           "OPENAI_API_KEY": "your_openai_api_key_here"
+         },
+         "autoStart": true,
+         "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
+       }
+     }
+   }
+   ```
+
+   **Option B: .env file (if supported):**
+   Create `.env` in your project root:
+   ```bash
    OPENAI_API_KEY=your_openai_api_key_here
-EMBEDDINGS_DB_PATH=./embeddings.db
-EMBEDDING_MODEL=text-embedding-3-large
-EMBEDDING_DIMENSIONS=3072
-```
+   EMBEDDINGS_DB_PATH=/absolute/path/to/embeddings.db
+   ```
 
 3. **Find the correct path**  
    ```bash
@@ -99,14 +116,26 @@ Your AI will find relevant documentation sections and provide answers with direc
 ## Troubleshooting
 
 **Cursor shows "No tools"**:
-- Make sure the path in `.cursor/mcp.json` is absolute and correct
+- Use absolute paths in `.cursor/mcp.json`
 - Check that `run-mcp-safe.sh` is executable: `chmod +x run-mcp-safe.sh`  
-- Restart Cursor completely (not just the window)
+- Restart Cursor completely (not just reload window)
+- Verify the path exists: `ls -la /your/absolute/path/run-mcp-safe.sh`
 
-**Search not working**:
-- Verify your OpenAI API key in the `.env` file
-- Check that `embeddings.db` exists and is ~260MB
-- Look at logs: `tail -f /tmp/apple-docs-mcp.err`
+**"OpenAI not initialized" or API key errors**:
+- **Recommended**: Put API key in `mcp.json` env section (see Option A above)
+- Alternative: Ensure `.env` file is in the correct location (project root)
+- Check API key format: starts with `sk-proj-` or `sk-`
+- View logs: `tail -f /tmp/apple-docs-mcp.err`
+
+**"Cannot open database" errors**:  
+- Database auto-downloads to package location during install
+- If missing, reinstall: `npm uninstall apple-docs-mcp-server && npm install apple-docs-mcp-server`
+- For manual path: use absolute path in EMBEDDINGS_DB_PATH
+- Check database exists and is ~260MB: `ls -lh node_modules/apple-docs-mcp-server/embeddings.db`
+
+**"Method not found" errors**:
+- Use correct MCP call format: `{"method":"tools/call","params":{"name":"search_docs","arguments":{...}}}`
+- Available tools: `search_docs`, `get_doc`, `get_stats`
 
 **Path has spaces**:
 ```bash
@@ -130,7 +159,11 @@ cp .env.example .env
 
 **Test the server**:
 ```bash
+# List available tools
 echo '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}' | ./run-mcp-safe.sh
+
+# Test search functionality  
+echo '{"jsonrpc":"2.0","id":"2","method":"tools/call","params":{"name":"search_docs","arguments":{"query":"SwiftUI animation","limit":3}}}' | ./run-mcp-safe.sh
 ```
 
 ## Example Cursor Configuration
@@ -143,6 +176,9 @@ For a typical project setup where you installed the package locally:
   "mcpServers": {
     "apple_docs": {
       "command": "/absolute/path/to/your-project/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
+      "env": {
+        "OPENAI_API_KEY": "sk-proj-your_key_here"
+      },
       "autoStart": true,
       "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
     }

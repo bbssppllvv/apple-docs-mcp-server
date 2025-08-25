@@ -5,10 +5,40 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import pLimit from 'p-limit';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { AppleSearchEngine } from './search.js';
 
-// Load .env configuration silently
-dotenv.config({ override: false });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Try loading .env from multiple locations
+function loadEnvironment() {
+  const envPaths = [
+    // 1. Current working directory (user's project)
+    path.join(process.cwd(), '.env'),
+    // 2. Package directory (our location)  
+    path.join(__dirname, '.env'),
+    // 3. Parent directory (if installed as dependency)
+    path.join(process.cwd(), '..', '.env'),
+    // 4. Project root (common location)
+    path.join(process.cwd(), '..', '..', '.env')
+  ];
+  
+  for (const envPath of envPaths) {
+    try {
+      dotenv.config({ path: envPath, override: false });
+    } catch (e) {
+      // Silently continue to next path
+    }
+  }
+  
+  // Also load from default location
+  dotenv.config({ override: false });
+}
+
+// Load environment variables
+loadEnvironment();
 
 const SERVER_INFO = {
   name: 'apple-docs-mcp-server',

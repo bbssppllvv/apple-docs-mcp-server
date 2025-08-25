@@ -1,5 +1,11 @@
 import Database from 'better-sqlite3';
 import OpenAI from 'openai';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class AppleSearchEngine {
   constructor() {
@@ -9,10 +15,44 @@ export class AppleSearchEngine {
     this.openaiInitialized = false;
   }
 
+  findDatabasePath() {
+    // Try environment variable first
+    if (process.env.EMBEDDINGS_DB_PATH) {
+      const envPath = process.env.EMBEDDINGS_DB_PATH;
+      if (fs.existsSync(envPath)) {
+        return envPath;
+      }
+    }
+
+    // List of paths to try (in order of preference)
+    const candidatePaths = [
+      // 1. Relative to package (most common)
+      path.join(__dirname, 'embeddings.db'),
+      // 2. Current working directory 
+      path.join(process.cwd(), 'embeddings.db'),
+      // 3. node_modules location
+      path.join(process.cwd(), 'node_modules', 'apple-docs-mcp-server', 'embeddings.db'),
+      // 4. Default relative path (fallback)
+      './embeddings.db'
+    ];
+
+    for (const dbPath of candidatePaths) {
+      if (fs.existsSync(dbPath)) {
+        console.error(`✅ Found database at: ${dbPath}`);
+        return dbPath;
+      }
+    }
+
+    // Fallback to environment variable or default
+    const fallbackPath = process.env.EMBEDDINGS_DB_PATH || './embeddings.db';
+    console.error(`⚠️  Database not found. Using: ${fallbackPath}`);
+    return fallbackPath;
+  }
+
   async init(initOpenAI = true) {
     try {
-      // Initialize SQLite database
-      const dbPath = process.env.EMBEDDINGS_DB_PATH || './embeddings.db';
+      // Initialize SQLite database with smart path resolution
+      const dbPath = this.findDatabasePath();
       this.db = new Database(dbPath);
       
       this.initialized = true;

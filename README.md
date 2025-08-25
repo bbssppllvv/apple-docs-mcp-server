@@ -24,11 +24,17 @@ This MCP server connects your AI assistant (like Cursor) to Apple's entire devel
 
 ## Installation
 
+**Local installation (recommended):**
 ```bash
-npm install -g apple-docs-mcp-server
+npm install apple-docs-mcp-server
 ```
 
-The vector database (~260MB) downloads automatically during installation.
+**For existing projects, add to package.json:**
+```bash
+npm install --save apple-docs-mcp-server
+```
+
+The vector database (~260MB) downloads automatically during installation. This may take 1-3 minutes depending on your connection speed.
 
 ## Setup with Cursor
 
@@ -58,8 +64,13 @@ The vector database (~260MB) downloads automatically during installation.
 
 3. **Find the correct path**  
    ```bash
-   npm list -g apple-docs-mcp-server | head -1
-   # Use the shown path + /node_modules/apple-docs-mcp-server/run-mcp-safe.sh
+   # If installed locally in your project:
+   pwd
+   # Use: /your/project/path/node_modules/apple-docs-mcp-server/run-mcp-safe.sh
+   
+   # If you need global install (not recommended):
+   npm config get prefix
+   # Use: /prefix/path/lib/node_modules/apple-docs-mcp-server/run-mcp-safe.sh
    ```
 
 4. **Restart Cursor completely**
@@ -120,6 +131,29 @@ cp .env.example .env
 **Test the server**:
 ```bash
 echo '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}' | ./run-mcp-safe.sh
+```
+
+## Example Cursor Configuration
+
+For a typical project setup where you installed the package locally:
+
+```json
+{
+  "schemaVersion": 1,
+  "mcpServers": {
+    "apple_docs": {
+      "command": "/Users/your-username/your-project/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
+      "autoStart": true,
+      "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
+    }
+  }
+}
+```
+
+**Find your exact path:**
+```bash
+# In your project directory:
+echo "$(pwd)/node_modules/apple-docs-mcp-server/run-mcp-safe.sh"
 ```
 
 ## Technical details

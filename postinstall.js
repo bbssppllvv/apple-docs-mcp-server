@@ -22,7 +22,8 @@ if (fs.existsSync(DB_PATH)) {
     process.exit(0);
 }
 
-console.log('📥 Database not found. Downloading embeddings.db...');
+console.log('📥 Database not found. Downloading embeddings.db (~260MB)...');
+console.log('⏳ This may take 1-3 minutes depending on your connection speed.');
 console.log(`📡 Source: ${DB_URL}`);
 
 const downloadDatabase = () => {
@@ -55,14 +56,18 @@ const downloadDatabase = () => {
                 const totalMB = (totalBytes / (1024 * 1024)).toFixed(0);
                 const percent = ((downloadedBytes / totalBytes) * 100).toFixed(1);
                 
-                process.stdout.write(`\r📥 Downloaded: ${progressMB}MB / ${totalMB}MB (${percent}%)`);
+                // Update progress every 5MB to reduce spam
+                if (downloadedBytes % (5 * 1024 * 1024) < chunk.length || downloadedBytes === totalBytes) {
+                    process.stdout.write(`\r📥 Downloading Apple documentation database: ${progressMB}MB / ${totalMB}MB (${percent}%)`);
+                }
             });
 
             response.pipe(file);
 
             file.on('finish', () => {
                 console.log('\n✅ Database downloaded successfully!');
-                console.log('🚀 Installation complete! Ready to use.');
+                console.log('📚 Apple documentation database (16,253+ documents) ready!');
+                console.log('🚀 Installation complete! Configure your .cursor/mcp.json and restart Cursor.');
                 resolve();
             });
         }

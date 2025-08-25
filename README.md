@@ -36,26 +36,11 @@ npm install --save apple-docs-mcp-server
 
 The documentation database (~260MB) downloads automatically during installation.
 
-## Setup with Cursor
+## Setup with Cursor - Zero Confirmations
 
-1. **Add MCP configuration**  
-   Create `.cursor/mcp.json` in your project root:
-   ```json
-   {
-     "schemaVersion": 1,
-     "mcpServers": {
-       "apple_docs": {
-         "command": "/usr/local/bin/apple-docs-mcp-server/run-mcp-safe.sh",
-         "autoStart": true,
-         "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
-       }
-     }
-   }
-   ```
+**🚀 Seamless Experience**: This configuration eliminates all manual confirmations for smooth workflow.
 
-2. **Choose your configuration method**
-
-   **Option A: Environment variables in mcp.json (recommended):**
+1. **Create `.cursor/mcp.json`** in your project root:
    ```json
    {
      "schemaVersion": 1,
@@ -66,17 +51,38 @@ The documentation database (~260MB) downloads automatically during installation.
            "OPENAI_API_KEY": "your_openai_api_key_here"
          },
          "autoStart": true,
-         "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
+         "alwaysAllow": ["search_docs", "get_doc", "get_stats"],
+         "timeout": 30000
        }
      }
    }
    ```
+   
+   **Key settings for automation**:
+   - `autoStart: true` - Server starts automatically, no manual activation
+   - `alwaysAllow: [...]` - All tools pre-approved, zero confirmation dialogs  
+   - `timeout: 30000` - Sufficient timeout for database operations
 
-   **Option B: .env file (if supported):**
-   Create `.env` in your project root:
+2. **Alternative: .env file method**
+   If you prefer separate .env files, create `.env` in your project root:
    ```bash
    OPENAI_API_KEY=your_openai_api_key_here
    EMBEDDINGS_DB_PATH=/absolute/path/to/embeddings.db
+   ```
+   
+   Then use simpler mcp.json:
+   ```json
+   {
+     "schemaVersion": 1,
+     "mcpServers": {
+       "apple_docs": {
+         "command": "/absolute/path/to/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
+         "autoStart": true,
+         "alwaysAllow": ["search_docs", "get_doc", "get_stats"],
+         "timeout": 30000
+       }
+     }
+   }
    ```
 
 3. **Find the correct path**  
@@ -94,14 +100,30 @@ The documentation database (~260MB) downloads automatically during installation.
 
 ## How to use
 
-Ask your AI assistant questions about Apple development and it will search through the documentation:
+With proper configuration above, simply ask your AI assistant questions about Apple development:
 
 - "Show me Core Data CloudKit synchronization examples"
 - "How do I use SwiftUI @Observable property wrapper?"
 - "What's new in UIKit for iOS 18?"
 - "Find RealityKit documentation about entity components"
 
-Your AI will find relevant documentation sections and provide answers with direct links to Apple's official docs.
+**🚀 Seamless experience**: No confirmation buttons, no interruptions. Your AI automatically searches documentation and provides answers with source links.
+
+## Eliminating Confirmation Prompts
+
+**The Problem**: By default, Cursor asks for permission on every tool use, breaking your flow:
+```
+🔘 Allow apple_docs to search documents? [Allow] [Deny]
+🔘 Allow apple_docs to get document content? [Allow] [Deny]  
+🔘 Allow apple_docs to get statistics? [Allow] [Deny]
+```
+
+**The Solution**: Pre-approve all tools with `alwaysAllow`:
+```json
+"alwaysAllow": ["search_docs", "get_doc", "get_stats"]
+```
+
+**Result**: Uninterrupted workflow - AI searches, finds, and explains without any manual confirmations.
 
 ## Why this works well
 
@@ -120,6 +142,12 @@ Your AI will find relevant documentation sections and provide answers with direc
 - Check that `run-mcp-safe.sh` is executable: `chmod +x run-mcp-safe.sh`  
 - Restart Cursor completely (not just reload window)
 - Verify the path exists: `ls -la /your/absolute/path/run-mcp-safe.sh`
+
+**Still getting confirmation prompts**:
+- Ensure `alwaysAllow` includes all tools: `["search_docs", "get_doc", "get_stats"]`
+- Verify `autoStart: true` is set
+- Check JSON syntax is valid (no trailing commas)
+- Try deleting Cursor's MCP cache: close Cursor, restart, try again
 
 **"OpenAI not initialized" or API key errors**:
 - **Recommended**: Put API key in `mcp.json` env section (see Option A above)
@@ -180,11 +208,14 @@ For a typical project setup where you installed the package locally:
         "OPENAI_API_KEY": "sk-proj-your_key_here"
       },
       "autoStart": true,
-      "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
+      "alwaysAllow": ["search_docs", "get_doc", "get_stats"],
+      "timeout": 30000
     }
   }
 }
 ```
+
+**🎯 Zero-confirmation workflow**: With this setup, your AI can search Apple docs and fetch detailed documentation without any manual approvals. Just ask questions and get instant answers!
 
 **Find your exact path:**
 ```bash

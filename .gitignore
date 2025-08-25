@@ -3,8 +3,8 @@
 .env.local
 .env.production
 
-# Database files (comment if you want to include embeddings.db)
-embeddings.db
+# Database files - now tracked with Git LFS
+# embeddings.db (removed from gitignore, using Git LFS)
 
 # Log files
 *.log

@@ -34,9 +34,7 @@ npm install apple-docs-mcp-server
 npm install --save apple-docs-mcp-server
 ```
 
-The vector database (~260MB) downloads automatically during installation with **real-time progress display**. This may take 1-3 minutes depending on your connection speed.
-
-**Note**: NPM may show a spinner (⠴) during download - this is normal! The real progress appears above the spinner.
+The documentation database (~260MB) downloads automatically during installation.
 
 ## Setup with Cursor
 

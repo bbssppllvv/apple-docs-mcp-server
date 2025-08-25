@@ -1,5 +1,10 @@
 # Apple Docs MCP Server
 
+[![NPM Version](https://img.shields.io/npm/v/apple-docs-mcp-server)](https://www.npmjs.com/package/apple-docs-mcp-server)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node.js-18%2B-brightgreen.svg)](https://nodejs.org/)
+[![Documentation](https://img.shields.io/badge/docs-16%2C253%2B-orange.svg)](https://github.com/bbssppllvv/apple-docs-mcp-server)
+
 Semantic search through Apple's complete developer documentation for your AI coding assistant.
 
 ## What this does

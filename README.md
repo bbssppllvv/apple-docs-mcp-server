@@ -34,7 +34,7 @@ npm install apple-docs-mcp-server
 npm install --save apple-docs-mcp-server
 ```
 
-The vector database (~260MB) downloads automatically during installation. This may take 1-3 minutes depending on your connection speed.
+The vector database (~260MB) downloads automatically during installation with real-time progress display. This may take 1-3 minutes depending on your connection speed.
 
 ## Setup with Cursor
 
@@ -55,12 +55,12 @@ The vector database (~260MB) downloads automatically during installation. This m
 
 2. **Set up your environment**  
    Create `.env` file with your OpenAI API key:
-   ```bash
+```bash
    OPENAI_API_KEY=your_openai_api_key_here
-   EMBEDDINGS_DB_PATH=./embeddings.db
-   EMBEDDING_MODEL=text-embedding-3-large
-   EMBEDDING_DIMENSIONS=3072
-   ```
+EMBEDDINGS_DB_PATH=./embeddings.db
+EMBEDDING_MODEL=text-embedding-3-large
+EMBEDDING_DIMENSIONS=3072
+```
 
 3. **Find the correct path**  
    ```bash

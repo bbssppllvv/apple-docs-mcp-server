@@ -14,9 +14,11 @@ This tool connects your AI assistant (like Cursor) to Apple's entire developer d
 - All iOS, macOS, watchOS, tvOS, and visionOS documentation
 - WWDC session transcripts (2019-2025)
 - Complete API references for all frameworks
+- **Code examples** with context and explanations
+- **Human Interface Guidelines** (HIG) - Apple's complete design guidelines
 - Latest APIs: iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26
 
-**How it works:** Intelligent search that understands concepts, not just keywords. Ask about "memory management in SwiftUI" and it finds relevant documentation even if those exact words aren't used.
+**How it works:** Natural language search - ask questions in plain English. Type "how to animate a button press" or "best practices for iOS navigation" and get relevant answers. The search understands concepts and context, not just exact keyword matches.
 
 **Database:** 16,253+ documents with complete content coverage.
 
@@ -62,22 +64,33 @@ echo "$(pwd)/node_modules/apple-docs-mcp-server/run-mcp-safe.sh"
 
 Ask your AI assistant questions about Apple development:
 
-- "Show me Core Data CloudKit synchronization examples"
-- "How do I use SwiftUI @Observable property wrapper?"
+**API & Code examples:**
+- "Show me SwiftUI animation code examples"
+- "How do I use Core Data with CloudKit synchronization?"
 - "What's new in UIKit for iOS 26?"
-- "Find RealityKit documentation about entity components"
 
-Your AI will search through Apple's documentation and provide answers with source links. For documents with code examples, your AI can extract those examples with explanations.
+**Design & HIG questions:**
+- "Apple's guidelines for button design in iOS apps"
+- "Best practices for navigation patterns on iPad"
+- "Accessibility requirements for app icons"
+
+**Natural language queries:**
+- "How to handle memory management in SwiftUI?"
+- "Best way to implement dark mode support"
+
+Your AI searches through Apple's complete documentation and provides answers with source links. When documents contain code examples, your AI can extract those examples with full context and explanations.
 
 ## Key benefits
 
-**Complete coverage:** Contains everything from developer.apple.com plus WWDC transcripts.
+**Complete library:** This is the most comprehensive Apple developer documentation collection available. Everything Apple has published - API docs, WWDC transcripts, Human Interface Guidelines, code examples - all in one searchable database.
 
-**Smart search:** Understands concepts and context, not just keyword matching.
+**Natural language search:** Ask questions in plain English. No need to know exact API names or keywords. The search understands what you're trying to accomplish.
 
-**Fast responses:** All documents are processed locally. Search results appear in under a second.
+**Code examples included:** Not just documentation text, but actual working code with explanations and context.
 
-**Current information:** Includes the latest APIs and frameworks for all Apple platforms with complete WWDC 2025 content.
+**Fast and local:** All documents are processed on your machine. Search results appear instantly without API calls.
+
+**Always current:** Includes the latest APIs and frameworks for all Apple platforms with complete WWDC 2025 content.
 
 ## Troubleshooting
 
@@ -96,9 +109,9 @@ Your AI will search through Apple's documentation and provide answers with sourc
 
 ## Available tools
 
-- `search_docs`: Search through all Apple documentation  
+- `search_docs`: Search through all Apple documentation and design guidelines
 - `get_doc`: Get complete document content by ID
-- `get_code_examples`: Extract code examples with context from documents
+- `get_code_examples`: Extract working Swift code examples from documentation with explanations
 - `get_stats`: Database statistics and information
 
 ## Requirements

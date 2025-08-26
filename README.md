@@ -13,7 +13,7 @@ This MCP server connects your AI assistant (like Cursor) to Apple's entire devel
 
 **What's included**: The most complete collection of Apple developer documentation available:
 - All iOS, macOS, watchOS, tvOS, and visionOS documentation
-- WWDC session transcripts (2019-2026) 
+- WWDC session transcripts (2019-2025) 
 - Complete API references for all frameworks
 - Code examples and implementation guides
 - Latest APIs including iOS 26, macOS 26, watchOS 26, tvOS 26, and visionOS 26

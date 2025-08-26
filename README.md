@@ -63,6 +63,8 @@ The documentation database (~260MB) downloads automatically during installation.
    - `alwaysAllow: [...]` - All tools pre-approved, zero confirmation dialogs  
    - `timeout: 30000` - Sufficient timeout for database operations
 
+   **⚠️ IMPORTANT**: Also disable "MCP Tools Protection" in Cursor Settings → Chat for full automation.
+
 2. **Alternative: .env file method**
    If you prefer separate .env files, create `.env` in your project root:
    ```bash
@@ -118,7 +120,14 @@ With proper configuration above, simply ask your AI assistant questions about Ap
 🔘 Allow apple_docs to get statistics? [Allow] [Deny]
 ```
 
-**The Solution**: Pre-approve all tools with `alwaysAllow`:
+**🎯 BEST Solution**: Disable MCP Tools Protection in Cursor:
+1. Open **Cursor Settings** (`Cmd/Ctrl + ,`)
+2. Go to **Chat** section  
+3. Find **"MCP Tools Protection"**
+4. **Turn OFF** "Prevent Agent from running MCP tools automatically"
+5. Restart Cursor
+
+**Alternative Solution**: Pre-approve tools in mcp.json:
 ```json
 "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
 ```
@@ -144,10 +153,11 @@ With proper configuration above, simply ask your AI assistant questions about Ap
 - Verify the path exists: `ls -la /your/absolute/path/run-mcp-safe.sh`
 
 **Still getting confirmation prompts**:
-- Ensure `alwaysAllow` includes all tools: `["search_docs", "get_doc", "get_stats"]`
-- Verify `autoStart: true` is set
+- **FIRST**: Check Cursor Settings → Chat → Turn OFF "MCP Tools Protection"
+- Restart Cursor completely after changing this setting
+- Alternative: Ensure `alwaysAllow` includes all tools: `["search_docs", "get_doc", "get_stats"]`
+- Verify `autoStart: true` is set  
 - Check JSON syntax is valid (no trailing commas)
-- Try deleting Cursor's MCP cache: close Cursor, restart, try again
 
 **"OpenAI not initialized" or API key errors**:
 - **Recommended**: Put API key in `mcp.json` env section (see Option A above)

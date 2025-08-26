@@ -63,7 +63,7 @@ The documentation database (~260MB) downloads automatically during installation.
    - `alwaysAllow: [...]` - All tools pre-approved, zero confirmation dialogs  
    - `timeout: 30000` - Sufficient timeout for database operations
 
-   **⚠️ IMPORTANT**: Also disable "MCP Tools Protection" in Cursor Settings → Chat for full automation.
+
 
 2. **Alternative: .env file method**
    If you prefer separate .env files, create `.env` in your project root:
@@ -111,28 +111,14 @@ With proper configuration above, simply ask your AI assistant questions about Ap
 
 **🚀 Seamless experience**: No confirmation buttons, no interruptions. Your AI automatically searches documentation and provides answers with source links.
 
-## Eliminating Confirmation Prompts
+## Pro tip: Skip confirmation dialogs
 
-**The Problem**: By default, Cursor asks for permission on every tool use, breaking your flow:
-```
-🔘 Allow apple_docs to search documents? [Allow] [Deny]
-🔘 Allow apple_docs to get document content? [Allow] [Deny]  
-🔘 Allow apple_docs to get statistics? [Allow] [Deny]
-```
+Getting tired of clicking "Allow" every time? In Cursor Settings → Chat, turn off "MCP Tools Protection". Much smoother workflow.
 
-**🎯 BEST Solution**: Disable MCP Tools Protection in Cursor:
-1. Open **Cursor Settings** (`Cmd/Ctrl + ,`)
-2. Go to **Chat** section  
-3. Find **"MCP Tools Protection"**
-4. **Turn OFF** "Prevent Agent from running MCP tools automatically"
-5. Restart Cursor
-
-**Alternative Solution**: Pre-approve tools in mcp.json:
+Alternatively, add this to your mcp.json:
 ```json
 "alwaysAllow": ["search_docs", "get_doc", "get_stats"]
 ```
-
-**Result**: Uninterrupted workflow - AI searches, finds, and explains without any manual confirmations.
 
 ## Why this works well
 
@@ -153,11 +139,9 @@ With proper configuration above, simply ask your AI assistant questions about Ap
 - Verify the path exists: `ls -la /your/absolute/path/run-mcp-safe.sh`
 
 **Still getting confirmation prompts**:
-- **FIRST**: Check Cursor Settings → Chat → Turn OFF "MCP Tools Protection"
-- Restart Cursor completely after changing this setting
-- Alternative: Ensure `alwaysAllow` includes all tools: `["search_docs", "get_doc", "get_stats"]`
-- Verify `autoStart: true` is set  
-- Check JSON syntax is valid (no trailing commas)
+- Turn off "MCP Tools Protection" in Cursor Settings → Chat
+- Or check that `alwaysAllow` has all tools: `["search_docs", "get_doc", "get_stats"]`
+- Restart Cursor after changes
 
 **"OpenAI not initialized" or API key errors**:
 - **Recommended**: Put API key in `mcp.json` env section (see Option A above)

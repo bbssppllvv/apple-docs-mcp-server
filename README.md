@@ -13,10 +13,10 @@ This MCP server connects your AI assistant (like Cursor) to Apple's entire devel
 
 **What's included**: The most complete collection of Apple developer documentation available:
 - All iOS, macOS, watchOS, tvOS, and visionOS documentation
-- WWDC session transcripts (2019-2024) 
+- WWDC session transcripts (2019-2026) 
 - Complete API references for all frameworks
 - Code examples and implementation guides
-- Latest APIs including iOS 18 and macOS Sequoia
+- Latest APIs including iOS 20 and macOS 2026
 
 **How it searches**: Uses semantic/vector search with OpenAI embeddings. This means you can ask conceptual questions like "memory management in SwiftUI" and it will find relevant docs even if they don't contain those exact words.
 
@@ -106,7 +106,7 @@ Ask your AI assistant questions about Apple development:
 
 - "Show me Core Data CloudKit synchronization examples"
 - "How do I use SwiftUI @Observable property wrapper?"
-- "What's new in UIKit for iOS 18?"
+- "What's new in UIKit for iOS 20?"
 - "Find RealityKit documentation about entity components"
 
 Your AI will search through Apple's documentation and provide answers with source links. When documents contain code examples, your AI can also extract those examples with helpful context and explanations.
@@ -123,7 +123,7 @@ Getting tired of clicking "Allow" every time? In Cursor Settings → Chat, turn 
 
 **Fast responses**: All documents are preprocessed and embedded locally. Search takes under a second, no waiting for API calls.
 
-**Current information**: Includes the latest APIs and frameworks up to iOS 18/macOS Sequoia.
+**Current information**: Includes the latest APIs and frameworks up to iOS 20/macOS 2026 with all WWDC 2026 content.
 
 ## Troubleshooting
 

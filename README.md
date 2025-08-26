@@ -10,14 +10,12 @@ Search through Apple's complete developer documentation using your AI coding ass
 
 This tool connects your AI assistant (like Cursor) to Apple's entire developer documentation. Instead of manually browsing developer.apple.com, your AI can search through Apple's docs and provide precise answers with source links.
 
-**Documentation included:**
-- All iOS, macOS, watchOS, tvOS, and visionOS documentation
-- WWDC session transcripts (2019-2025)
-- Complete API references for all frameworks
-- **Code examples** with context and explanations
-- **Human Interface Guidelines** (HIG) - Apple's complete design guidelines
-- **Latest WWDC 2025 APIs:** Liquid Glass API, Foundation Models Framework, and more
-- Current platform versions: iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26
+**Complete documentation coverage:**
+- **All Apple platforms:** iOS, macOS, watchOS, tvOS, and visionOS - from early versions to current iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26
+- **WWDC session transcripts** from 2019-2025 (including latest WWDC 2025 with Liquid Glass API, Foundation Models Framework)  
+- **Complete API references** for all frameworks - legacy APIs, current APIs, and newest additions
+- **Code examples** with context and explanations across all versions
+- **Human Interface Guidelines (HIG)** - Apple's complete design guidelines for all platforms
 
 **How it works:** Natural language search - ask questions in plain English. Type "how to animate a button press" or "best practices for iOS navigation" and get relevant answers. The search understands concepts and context, not just exact keyword matches.
 
@@ -52,7 +50,6 @@ The documentation database (260MB) downloads automatically during installation.
 }
 ```
 
-
 **2. Find your correct path:**
 ```bash
 # In your project directory:
@@ -65,38 +62,35 @@ echo "$(pwd)/node_modules/apple-docs-mcp-server/run-mcp-safe.sh"
 
 Ask your AI assistant questions about Apple development:
 
-**API & Code examples:**
+**API & Code examples (any version):**
 - "Show me SwiftUI animation code examples"
 - "How do I use Core Data with CloudKit synchronization?"
+- "Foundation Models Framework setup and usage examples"
 - "What's new in UIKit for iOS 26?"
 
-**WWDC 2025 latest APIs:**
-- "How to implement Liquid Glass effects in my app?"
-- "Foundation Models Framework setup and usage examples"
-- "What new capabilities does iOS 26 bring for AI?"
-
-**Design & HIG questions:**
+**Design & Interface Guidelines:**
 - "Apple's guidelines for button design in iOS apps"
 - "Best practices for navigation patterns on iPad"
 - "Accessibility requirements for app icons"
 
 **Natural language queries:**
 - "How to handle memory management in SwiftUI?"
+- "How to implement Liquid Glass effects in my app?"
 - "Best way to implement dark mode support"
 
 Your AI searches through Apple's complete documentation and provides answers with source links. When documents contain code examples, your AI can extract those examples with full context and explanations.
 
 ## Key benefits
 
-**Complete library:** This is the most comprehensive Apple developer documentation collection available. Everything Apple has published - API docs, WWDC transcripts, Human Interface Guidelines, code examples - all in one searchable database.
+**Complete historical and current coverage:** This is the most comprehensive Apple developer documentation collection available. Everything Apple has ever published and continues to publish - from legacy APIs to cutting-edge frameworks, all WWDC sessions from 2019-2025, complete Human Interface Guidelines - all in one searchable database.
 
 **Natural language search:** Ask questions in plain English. No need to know exact API names or keywords. The search understands what you're trying to accomplish.
 
-**Code examples included:** Not just documentation text, but actual working code with explanations and context.
+**Working code examples:** Not just documentation text, but actual Swift code with explanations and context across all platform versions.
 
 **Fast and local:** All documents are processed on your machine. Search results appear instantly without API calls.
 
-**Always current:** Includes the latest APIs and frameworks for all Apple platforms with complete WWDC 2025 content, including new technologies like Liquid Glass API and Foundation Models Framework.
+**From legacy to latest:** Whether you need legacy iOS 13 APIs or the newest iOS 26 features like Liquid Glass API - it's all here with complete WWDC 2025 content.
 
 ## Troubleshooting
 

@@ -368,23 +368,39 @@ PERFECT FOR: AI agents who want to drill down into specific documents after init
       );
 
       const formattedResults = results.map(result => {
+        // 🧹 APPLY CONTENT CLEANER - Universal content enhancement
+        const cleanedContent = engine.enhanceContentQuality(result.content);
+        
         const baseResult = {
           id: result.id,
           title: result.title,
           url: result.url,
           similarity: Math.round(result.similarity * 10000) / 100, // Percentage with 2 decimals
           snippet: includeContent ? 
-            (result.content.length > maxContentChars ? 
-              result.content.substring(0, maxContentChars) + '...' : 
-              result.content
+            (cleanedContent.length > maxContentChars ? 
+              cleanedContent.substring(0, maxContentChars) + '...' : 
+              cleanedContent
             ) : null
         };
 
-        // Add code preview if requested and document has code
-        if (showCodePreview && result.content && result.content.includes('```swift')) {
-          const swiftCodeMatch = result.content.match(/```swift\s*\n([\s\S]*?)\n?\s*```/);
+        // Add code preview if requested and document has code (using cleaned content)
+        if (showCodePreview && cleanedContent && cleanedContent.includes('```swift')) {
+          const swiftCodeMatch = cleanedContent.match(/```swift\s*\n([\s\S]*?)\n?\s*```/);
           if (swiftCodeMatch) {
-            const codePreview = swiftCodeMatch[1].trim();
+            // 🧹 Apply additional code cleaning specifically for preview
+            let codePreview = swiftCodeMatch[1].trim();
+            
+            // For short code previews, use aggressive comma-to-newline replacement
+            if (codePreview.length < 200 && codePreview.includes(',')) {
+              codePreview = codePreview
+                .replace(/{\s*,/g, '{\n    ')        // Fix opening braces
+                .replace(/,\s*}/g, '\n}')            // Fix closing braces  
+                .replace(/,\s+/g, ',\n    ')         // Replace comma+space with comma+newline+indent
+                .replace(/}\s*,\s*\./g, '\n}.');     // Fix closing brace + method call
+            } else {
+              codePreview = engine.attemptCodeFormatFix(codePreview); // Use complex logic for longer code
+            }
+            
             baseResult.codePreview = codePreview.length > 150 ? 
               codePreview.substring(0, 150) + '...' : 
               codePreview;
@@ -457,18 +473,23 @@ PERFECT FOR: AI agents who want to drill down into specific documents after init
           );
           
           if (relatedDocs.length > 0) {
-            response.relatedDocuments = relatedDocs.map(doc => ({
-              id: doc.id,
-              title: doc.title,
-              url: doc.url,
-              similarity: Math.round(doc.similarity * 10000) / 100,
-              relationship: doc.relationship,
-              snippet: includeContent ? 
-                (doc.content.length > 150 ? 
-                  doc.content.substring(0, 150) + '...' : 
-                  doc.content
-                ) : null
-            }));
+            response.relatedDocuments = relatedDocs.map(doc => {
+              // 🧹 CLEAN RELATED DOCUMENTS TOO - Consistent quality everywhere
+              const cleanedRelatedContent = engine.enhanceContentQuality(doc.content);
+              
+              return {
+                id: doc.id,
+                title: doc.title,
+                url: doc.url,
+                similarity: Math.round(doc.similarity * 10000) / 100,
+                relationship: doc.relationship,
+                snippet: includeContent ? 
+                  (cleanedRelatedContent.length > 150 ? 
+                    cleanedRelatedContent.substring(0, 150) + '...' : 
+                    cleanedRelatedContent
+                  ) : null
+              };
+            });
             response.coverage = 'extended'; // Flag that this is extended search
             response.totalWithRelated = results.length + relatedDocs.length;
           }
@@ -552,14 +573,17 @@ PERFECT FOR: AI agents who want to drill down into specific documents after init
       }
 
       const enrichedDocs = documents.map(doc => {
-        const codeBlocks = (doc.content.match(/```[\s\S]*?```/g) || []).length;
+        // 🧹 CLEAN FULL DOCUMENTS TOO - Complete content enhancement
+        const cleanedContent = engine.enhanceContentQuality(doc.content);
+        const codeBlocks = (cleanedContent.match(/```[\s\S]*?```/g) || []).length;
+        
         return {
           id: doc.id,
           title: doc.title,
           url: doc.url,
           type: doc.type || null,
-          content: doc.content,
-          contentLength: doc.content.length,
+          content: cleanedContent,  // Return cleaned content
+          contentLength: cleanedContent.length,
           codeBlocks: codeBlocks
         };
       });

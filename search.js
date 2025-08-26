@@ -890,6 +890,176 @@ export class AppleSearchEngine {
     return true;
   }
 
+  // 🧹 UNIVERSAL CONTENT CLEANER - Smart content enhancement system
+  // One solution for WWDC HTML artifacts, code formatting, and general readability
+  enhanceContentQuality(content, type = 'general') {
+    if (!content || typeof content !== 'string') return content;
+    
+    let enhanced = content;
+    
+    // 1. WWDC Transcript Cleaning - Remove HTML artifacts and navigation elements
+    enhanced = this.cleanTranscriptArtifacts(enhanced);
+    
+    // 2. Code Block Enhancement - Fix formatting issues
+    enhanced = this.enhanceCodeBlocks(enhanced);
+    
+    // 3. General Content Normalization
+    enhanced = this.normalizeWhitespace(enhanced);
+    
+    return enhanced.trim();
+  }
+
+  /**
+   * Clean WWDC transcript artifacts and HTML pollution
+   * Fixes issues like: "Search this video…\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\n..."
+   */
+  cleanTranscriptArtifacts(content) {
+    return content
+      // Remove video search UI artifacts
+      .replace(/Search this video…[\s\S]*?(\d+:\d+)/g, '$1')
+      
+      // Clean excessive tabs and newlines (WWDC transcript pollution)
+      .replace(/\n\t{4,}/g, '\n')              // Remove excessive tabs
+      .replace(/\t{3,}/g, '\t')                // Normalize remaining tabs
+      
+      // Remove navigation artifacts
+      .replace(/\n\s*\n\s*\n/g, '\n\n')        // Normalize paragraph breaks
+      
+      // Clean timestamp artifacts
+      .replace(/(\d+:\d+)[\s\t]*(\d+:\d+)/g, '$1 $2')  // Fix timestamp formatting
+      
+      // Remove HTML-like artifacts
+      .replace(/<[^>]*>/g, '')                 // Remove any remaining HTML tags
+      .replace(/&[a-zA-Z]+;/g, '')             // Remove HTML entities
+      
+      // Clean up common transcript artifacts
+      .replace(/^\s*\n/gm, '')                 // Remove empty lines at start
+      .replace(/\s+$/gm, '')                   // Remove trailing spaces
+      .replace(/\n{4,}/g, '\n\n\n');           // Limit consecutive newlines
+  }
+
+  /**
+   * Enhanced code block processing using existing attemptCodeFormatFix
+   * Improves the existing function to handle more edge cases
+   */
+  enhanceCodeBlocks(content) {
+    // Find and fix Swift code blocks with AGGRESSIVE cleaning for documentation
+    return content.replace(/```swift\s*\n([\s\S]*?)\n?\s*```/g, (match, code) => {
+      let fixedCode = code.trim();
+      
+      // AGGRESSIVE CLEANING for documentation code blocks (less conservative)
+      if (fixedCode.includes(',') && (
+        fixedCode.includes('Button') || 
+        fixedCode.includes('VStack') || 
+        fixedCode.includes('HStack') || 
+        fixedCode.includes('},'))) {
+        
+        fixedCode = fixedCode
+          .replace(/{\s*,/g, '{\n    ')        // Opening braces
+          .replace(/,\s*}/g, '\n}')            // Closing braces
+          .replace(/,\s+/g, ',\n    ')         // Comma + space = comma + newline + indent
+          .replace(/}\s*,\s*\./g, '\n}.')      // Fix closing brace + method call
+          .replace(/,(\s*)([A-Z][a-zA-Z]*\()/g, ',\n    $1$2')  // Function calls after commas
+          .trim();
+      } else {
+        // Use existing conservative logic for complex cases
+        fixedCode = this.attemptCodeFormatFix(fixedCode);
+      }
+      
+      return `\`\`\`swift\n${fixedCode}\n\`\`\``;
+    });
+  }
+
+  /**
+   * Normalize whitespace and improve readability
+   */
+  normalizeWhitespace(content) {
+    return content
+      // Normalize multiple spaces to single space (except in code blocks)
+      .replace(/(?<!``)[ ]{2,}(?!``)/g, ' ')
+      
+      // Fix common punctuation spacing
+      .replace(/([.!?])\s*\n\s*([A-Z])/g, '$1 $2')  // Fix sentence breaks
+      .replace(/([.!?])\s{2,}/g, '$1 ')              // Normalize sentence spacing
+      
+      // Clean up list formatting
+      .replace(/\n\s*[-*]\s+/g, '\n• ')              // Normalize bullet points
+      
+      // Remove trailing whitespace from lines
+      .replace(/[ \t]+$/gm, '');
+  }
+
+  /**
+   * IMPROVED: Enhanced attemptCodeFormatFix with better Swift pattern recognition
+   * Extends existing function with more intelligent code structure detection
+   */
+  attemptCodeFormatFix(code) {
+    if (!code || !code.includes(',')) {
+      return code; // Already properly formatted or no commas
+    }
+    
+    let fixed = code;
+    
+    // Phase 1: Smart structural analysis (ENHANCED)
+    // Detect if this is really corrupted code vs. natural comma usage
+    const suspiciousPatterns = [
+      /,\s*(let |var |func |@|import )/g,  // Keywords after commas
+      /{\s*,/g,                            // Opening braces with commas  
+      /,\s*}/g,                            // Commas before closing braces
+      /\)\s*,\s*{/g,                       // Method calls to closures
+      /,\s*(Button|Text|VStack|HStack|ZStack)/g, // SwiftUI views after commas
+      /},\s*\./g                           // Closing brace followed by method call
+    ];
+    
+    const hasCorruption = suspiciousPatterns.some(pattern => pattern.test(code));
+    if (!hasCorruption) {
+      return code; // Probably legitimate comma usage
+    }
+    
+    // Phase 2: Apply existing fix with enhancements
+    fixed = fixed
+      // Enhanced structural fixes
+      .replace(/{\s*,/g, '{\n    ')           // Opening braces with proper indent
+      .replace(/,\s*}/g, '\n}')               // Closing braces
+      .replace(/\)\s*,\s*{/g, ') {\n    ')    // Method call to closure
+      .replace(/;\s*,/g, ';\n')               // Statement endings
+      
+      // Enhanced Swift-specific patterns
+      .replace(/,\s*(let |var |func |class |struct |enum |protocol |import |@)/g, '\n$1')
+      .replace(/,\s*(\.[a-zA-Z])/g, '\n$1')        // Method chaining (remove indent - it was wrong)
+      .replace(/,\s*(\w+\()/g, '\n    $1')         // Function calls
+      .replace(/,\s*(\w+:)/g, ',\n        $1')     // Parameter labels (keep comma)
+      
+      // SwiftUI-specific patterns (НОВОЕ!)
+      .replace(/,\s*(Button|Text|VStack|HStack|ZStack|List|NavigationView)/g, '\n    $1') // SwiftUI views
+      .replace(/},\s*\./g, '\n}.')                 // Fix closing brace + method call
+      
+      // Enhanced indentation patterns  
+      .replace(/,(\s{8,})/g, '\n$1')               // Deep indentation
+      .replace(/,(\s{4,7})/g, '\n$1')              // Normal indentation
+      .replace(/,(\s{2,3})/g, '\n$1')              // Shallow indentation
+      
+      // Clean up artifacts
+      .replace(/\n\s*,/g, '\n')                    // Remove leading commas
+      .replace(/,\s*\n/g, '\n')                    // Remove trailing commas before newlines
+      .replace(/\n{3,}/g, '\n\n')                  // Remove excessive newlines
+      
+      // Final Swift-specific cleanup
+      .replace(/^(\s*)(\w+:)/gm, '$1    $2')       // Indent parameter labels
+      .trim();
+    
+    // Phase 3: Quality validation with better heuristics
+    const originalComplexity = (code.match(/[{}(),]/g) || []).length;
+    const fixedComplexity = (fixed.match(/[{}(),]/g) || []).length;
+    
+    // If we lost too much structure, fall back to simple replacement
+    if (fixedComplexity < originalComplexity * 0.7) {
+      return code.replace(/,(?=\s*(let|var|func|@|import))/g, '\n').trim();
+    }
+    
+    return fixed;
+  }
+
   close() {
     if (this.db) {
       this.db.close();

@@ -102,23 +102,18 @@ The documentation database (~260MB) downloads automatically during installation.
 
 ## How to use
 
-With proper configuration above, simply ask your AI assistant questions about Apple development:
+Ask your AI assistant questions about Apple development:
 
 - "Show me Core Data CloudKit synchronization examples"
 - "How do I use SwiftUI @Observable property wrapper?"
 - "What's new in UIKit for iOS 18?"
 - "Find RealityKit documentation about entity components"
 
-**🚀 Seamless experience**: No confirmation buttons, no interruptions. Your AI automatically searches documentation and provides answers with source links.
+Your AI will search through Apple's documentation and provide answers with source links.
 
 ## Pro tip: Skip confirmation dialogs
 
 Getting tired of clicking "Allow" every time? In Cursor Settings → Chat, turn off "MCP Tools Protection". Much smoother workflow.
-
-Alternatively, add this to your mcp.json:
-```json
-"alwaysAllow": ["search_docs", "get_doc", "get_stats"]
-```
 
 ## Why this works well
 
@@ -139,8 +134,7 @@ Alternatively, add this to your mcp.json:
 - Verify the path exists: `ls -la /your/absolute/path/run-mcp-safe.sh`
 
 **Still getting confirmation prompts**:
-- Turn off "MCP Tools Protection" in Cursor Settings → Chat
-- Or check that `alwaysAllow` has all tools: `["search_docs", "get_doc", "get_stats"]`
+- Turn off "MCP Tools Protection" in Cursor Settings → Chat  
 - Restart Cursor after changes
 
 **"OpenAI not initialized" or API key errors**:

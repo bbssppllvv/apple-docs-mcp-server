@@ -16,7 +16,8 @@ This tool connects your AI assistant (like Cursor) to Apple's entire developer d
 - Complete API references for all frameworks
 - **Code examples** with context and explanations
 - **Human Interface Guidelines** (HIG) - Apple's complete design guidelines
-- Latest APIs: iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26
+- **Latest WWDC 2025 APIs:** Liquid Glass API, Foundation Models Framework, and more
+- Current platform versions: iOS 26, macOS 26, watchOS 26, tvOS 26, visionOS 26
 
 **How it works:** Natural language search - ask questions in plain English. Type "how to animate a button press" or "best practices for iOS navigation" and get relevant answers. The search understands concepts and context, not just exact keyword matches.
 
@@ -69,6 +70,11 @@ Ask your AI assistant questions about Apple development:
 - "How do I use Core Data with CloudKit synchronization?"
 - "What's new in UIKit for iOS 26?"
 
+**WWDC 2025 latest APIs:**
+- "How to implement Liquid Glass effects in my app?"
+- "Foundation Models Framework setup and usage examples"
+- "What new capabilities does iOS 26 bring for AI?"
+
 **Design & HIG questions:**
 - "Apple's guidelines for button design in iOS apps"
 - "Best practices for navigation patterns on iPad"
@@ -90,7 +96,7 @@ Your AI searches through Apple's complete documentation and provides answers wit
 
 **Fast and local:** All documents are processed on your machine. Search results appear instantly without API calls.
 
-**Always current:** Includes the latest APIs and frameworks for all Apple platforms with complete WWDC 2025 content.
+**Always current:** Includes the latest APIs and frameworks for all Apple platforms with complete WWDC 2025 content, including new technologies like Liquid Glass API and Foundation Models Framework.
 
 ## Troubleshooting
 

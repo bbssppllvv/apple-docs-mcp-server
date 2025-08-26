@@ -51,7 +51,7 @@ The documentation database (~260MB) downloads automatically during installation.
            "OPENAI_API_KEY": "your_openai_api_key_here"
          },
          "autoStart": true,
-         "alwaysAllow": ["search_docs", "get_doc", "get_stats"],
+         "alwaysAllow": ["search_docs", "get_doc", "get_code_examples", "get_stats"],
          "timeout": 30000
        }
      }
@@ -80,7 +80,7 @@ The documentation database (~260MB) downloads automatically during installation.
        "apple_docs": {
          "command": "/absolute/path/to/node_modules/apple-docs-mcp-server/run-mcp-safe.sh",
          "autoStart": true,
-         "alwaysAllow": ["search_docs", "get_doc", "get_stats"],
+         "alwaysAllow": ["search_docs", "get_doc", "get_code_examples", "get_stats"],
          "timeout": 30000
        }
      }
@@ -109,7 +109,7 @@ Ask your AI assistant questions about Apple development:
 - "What's new in UIKit for iOS 18?"
 - "Find RealityKit documentation about entity components"
 
-Your AI will search through Apple's documentation and provide answers with source links.
+Your AI will search through Apple's documentation and provide answers with source links. When documents contain code examples, your AI can also extract those examples with helpful context and explanations.
 
 ## Pro tip: Skip confirmation dialogs
 
@@ -151,7 +151,7 @@ Getting tired of clicking "Allow" every time? In Cursor Settings → Chat, turn 
 
 **"Method not found" errors**:
 - Use correct MCP call format: `{"method":"tools/call","params":{"name":"search_docs","arguments":{...}}}`
-- Available tools: `search_docs`, `get_doc`, `get_stats`
+- Available tools: `search_docs`, `get_doc`, `get_code_examples`, `get_stats`
 
 **Path has spaces**:
 ```bash
@@ -196,7 +196,7 @@ For a typical project setup where you installed the package locally:
         "OPENAI_API_KEY": "sk-proj-your_key_here"
       },
       "autoStart": true,
-      "alwaysAllow": ["search_docs", "get_doc", "get_stats"],
+      "alwaysAllow": ["search_docs", "get_doc", "get_code_examples", "get_stats"],
       "timeout": 30000
     }
   }
@@ -216,6 +216,7 @@ echo "$(pwd)/node_modules/apple-docs-mcp-server/run-mcp-safe.sh"
 **MCP Tools**:
 - `search_docs`: Semantic search through all documentation
 - `get_doc`: Get complete document content by ID
+- `get_code_examples`: Extract code examples with context from documents (when available)
 - `get_stats`: Database statistics and sample titles
 
 **Search performance**: Typical response time under 1 second for semantic queries

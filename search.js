@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { CompatibilityAnalyzer } from './compatibility-analyzer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,6 +14,8 @@ export class AppleSearchEngine {
     this.openai = null;
     this.initialized = false;
     this.openaiInitialized = false;
+    // Initialize compatibility analyzer
+    this.compatibilityAnalyzer = new CompatibilityAnalyzer();
   }
 
   findDatabasePath() {
@@ -96,7 +99,7 @@ export class AppleSearchEngine {
       
       // Get all documents with their embeddings, joining two tables
       const stmt = this.db.prepare(`
-        SELECT d.id, d.title, d.url, d.content, e.embedding 
+        SELECT d.id, d.title, d.url, d.content, d.platforms, d.technologies, e.embedding 
         FROM documents d 
         JOIN embeddings e ON d.id = e.id
       `);
@@ -108,12 +111,28 @@ export class AppleSearchEngine {
         const docVector = this.blobToFloat32Array(doc.embedding);
         const similarity = this.calculateCosineSimilarity(queryVector, docVector);
         
+        // Add compatibility analysis (fast, non-blocking)
+        let compatibility = null;
+        try {
+          compatibility = this.compatibilityAnalyzer.analyze({
+            id: doc.id,
+            title: doc.title,
+            content: doc.content,
+            platforms: doc.platforms,
+            technologies: doc.technologies
+          });
+        } catch (error) {
+          // Fail silently to not break search
+          console.error(`Compatibility analysis failed for ${doc.id}:`, error);
+        }
+        
         return {
           id: doc.id,
           title: doc.title,
           url: doc.url,
           content: doc.content,
-          similarity: similarity
+          similarity: similarity,
+          compatibility: compatibility
         };
       });
       
@@ -530,6 +549,345 @@ export class AppleSearchEngine {
     });
     
     return Array.from(keywords).slice(0, 5);
+  }
+
+  /**
+   * Extract code examples from a specific document
+   * @param {string} docId - Document ID  
+   * @returns {Array} Code examples with context
+   */
+  extractCodeFromDocument(docId) {
+    if (!this.initialized) {
+      throw new Error('Engine not initialized. Call init() first.');
+    }
+
+    try {
+      // Get document from database
+      const doc = this.getDocument(docId);
+      if (!doc) {
+        throw new Error(`Document ${docId} not found`);
+      }
+
+      // Extract code examples directly (no complex legacy code)
+      const examples = this.extractCodeExamples(doc);
+      console.log(`📋 Extracted ${examples.length} code examples from ${doc.title}`);
+      
+      return examples;
+    } catch (error) {
+      console.error('Code extraction error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extract code examples from document (simple, no legacy complexity)
+   * @param {Object} doc - Document object
+   * @returns {Array} Simple code examples with context
+   */
+  extractCodeExamples(doc) {
+    const examples = [];
+    const content = doc.content;
+    
+    // Find Swift code blocks
+    const swiftCodeRegex = /```swift\s*\n([\s\S]*?)\n?\s*```/g;
+    let match;
+    
+    while ((match = swiftCodeRegex.exec(content)) !== null) {
+      const code = match[1].trim();
+      const startIndex = match.index;
+      
+      // Smart context extraction with sentence boundaries
+      const contextBefore = this.extractSmartContextBefore(content, startIndex);
+      const contextAfter = this.extractSmartContextAfter(content, startIndex + match[0].length);
+      
+      // Enhanced categorization with comprehensive patterns
+      const category = this.categorizeCodeEnhanced(code, doc.title, contextBefore + ' ' + contextAfter);
+      
+      // Simple complexity assessment
+      const lines = code.split('\n').length;
+      const complexity = lines <= 3 ? 'Simple' : lines <= 10 ? 'Medium' : 'Complex';
+      
+      // Attempt to fix corrupted formatting (commas instead of newlines)
+      const fixedCode = this.attemptCodeFormatFix(code);
+      
+      // Validate code quality before including
+      if (!this.isValidCodeExample(fixedCode, contextBefore + ' ' + contextAfter)) {
+        continue; // Skip invalid examples
+      }
+      
+      const actualLines = fixedCode.split('\n').length;
+      const actualComplexity = actualLines <= 3 ? 'Simple' : actualLines <= 10 ? 'Medium' : 'Complex';
+      
+      examples.push({
+        id: `${doc.id}_${startIndex}`,
+        documentId: doc.id,
+        documentTitle: doc.title,
+        documentUrl: doc.url,
+        code: fixedCode,
+        originalCode: code, // Keep original for debugging
+        language: 'swift',
+        lines: actualLines,
+        contextBefore: contextBefore,
+        contextAfter: contextAfter,
+        purpose: contextBefore.includes('example') ? 'Example' : 'Usage',
+        complexity: actualComplexity,
+        category: category,
+        hasComments: fixedCode.includes('//'),
+        usesSystemAPI: fixedCode.includes('Button') || fixedCode.includes('Text') || fixedCode.includes('List') ? ['SwiftUI'] : []
+      });
+    }
+    
+    return examples;
+  }
+  
+  /**
+   * Attempt to fix corrupted code formatting (improved version)
+   * @param {string} code - Corrupted code with commas instead of newlines
+   * @returns {string} Potentially fixed code
+   */
+  attemptCodeFormatFix(code) {
+    if (!code.includes(',')) {
+      return code; // Already properly formatted
+    }
+    
+    let fixed = code;
+    
+    // Phase 1: Handle structural elements first
+    fixed = fixed
+      .replace(/{\s*,/g, '{\n')           // Opening braces
+      .replace(/,\s*}/g, '\n}')           // Closing braces
+      .replace(/\)\s*,\s*{/g, ') {\n')    // ) { patterns
+      .replace(/;\s*,/g, ';\n')           // Semicolon line endings
+      
+    // Phase 2: Handle indentation patterns
+      .replace(/,(\s{8,})/g, '\n$1')      // 8+ spaces = deep indentation
+      .replace(/,(\s{4,7})/g, '\n$1')     // 4-7 spaces = normal indentation  
+      .replace(/,(\s{2,3})/g, '\n$1')     // 2-3 spaces = shallow indentation
+      
+    // Phase 3: Handle Swift-specific patterns
+      .replace(/,\s*(let |var |func |class |struct |enum |import |@)/g, '\n$1') // Swift keywords
+      .replace(/,\s*(\.[a-zA-Z])/g, '\n    $1')  // Method chaining with dot notation
+      .replace(/,\s*(\w+\()/g, '\n    $1')       // Function calls
+      .replace(/,\s*(\w+:)/g, '\n    $1')        // Parameter labels
+      
+    // Phase 4: Clean up artifacts
+      .replace(/\n\s*,/g, '\n')           // Remove leading commas
+      .replace(/,\s*\n/g, '\n')           // Remove trailing commas before newlines
+      .replace(/\n{3,}/g, '\n\n')         // Remove excessive newlines
+      .trim();
+    
+    // Phase 5: Final validation - if result looks worse, return simpler version
+    const originalLines = code.split(/[,\n]/).length;
+    const fixedLines = fixed.split('\n').length;
+    
+    // If we created too few lines, use basic fallback
+    if (fixedLines < originalLines * 0.5) {
+      return code.replace(/,/g, '\n').trim();
+    }
+    
+    return fixed;
+  }
+  
+  /**
+   * Extract context before code with smart sentence boundary detection
+   * @param {string} content - Full document content
+   * @param {number} startIndex - Start position of code block
+   * @returns {string} Context before code
+   */
+  extractSmartContextBefore(content, startIndex) {
+    const maxLength = 200;
+    const minLength = 50;
+    
+    // Get text before the code block
+    const beforeText = content.substring(Math.max(0, startIndex - maxLength), startIndex);
+    
+    // Try to find complete sentences
+    const sentences = beforeText.split(/[.!?]\s+/);
+    
+    if (sentences.length > 1) {
+      // Take last 1-2 complete sentences
+      const lastSentences = sentences.slice(-2).filter(s => s.trim().length > 10);
+      if (lastSentences.length > 0) {
+        return lastSentences.join('. ').trim();
+      }
+    }
+    
+    // Fallback: try paragraph breaks
+    const paragraphs = beforeText.split(/\n\s*\n/);
+    if (paragraphs.length > 1) {
+      const lastParagraph = paragraphs[paragraphs.length - 1].trim();
+      if (lastParagraph.length >= minLength) {
+        return lastParagraph;
+      }
+    }
+    
+    // Final fallback: just clean up the text
+    return beforeText.trim().replace(/^\W+/, ''); // Remove leading non-word chars
+  }
+  
+  /**
+   * Extract context after code with smart sentence boundary detection
+   * @param {string} content - Full document content
+   * @param {number} endIndex - End position of code block
+   * @returns {string} Context after code
+   */
+  extractSmartContextAfter(content, endIndex) {
+    const maxLength = 150;
+    
+    // Get text after the code block
+    const afterText = content.substring(endIndex, endIndex + maxLength);
+    
+    // Try to find the first complete sentence
+    const sentenceMatch = afterText.match(/^[^.!?]*[.!?]/);
+    if (sentenceMatch) {
+      return sentenceMatch[0].trim();
+    }
+    
+    // Try to find a reasonable break point (paragraph, code block, etc.)
+    const breakPoints = [
+      afterText.indexOf('\n\n'),
+      afterText.indexOf('\n```'),
+      afterText.indexOf('## ')
+    ].filter(pos => pos > 0);
+    
+    if (breakPoints.length > 0) {
+      const breakPoint = Math.min(...breakPoints);
+      return afterText.substring(0, breakPoint).trim();
+    }
+    
+    // Fallback: return first ~100 chars, breaking at word boundary
+    if (afterText.length > 100) {
+      const wordBreak = afterText.lastIndexOf(' ', 100);
+      if (wordBreak > 50) {
+        return afterText.substring(0, wordBreak).trim() + '...';
+      }
+    }
+    
+    return afterText.trim();
+  }
+  
+  /**
+   * Enhanced code categorization with comprehensive pattern matching
+   * @param {string} code - Code snippet
+   * @param {string} title - Document title
+   * @param {string} context - Context around code
+   * @returns {string} Category name
+   */
+  categorizeCodeEnhanced(code, title, context) {
+    const lowerCode = code.toLowerCase();
+    const lowerTitle = title.toLowerCase();
+    const lowerContext = context.toLowerCase();
+    
+    // Combine all text for pattern matching
+    const allText = `${lowerCode} ${lowerTitle} ${lowerContext}`;
+    
+    // UI Controls & Input
+    if (/button|toggle|slider|picker|textfield|secureField|datepicker|stepper/i.test(allText)) {
+      return 'UI Controls';
+    }
+    
+    // Navigation & Routing
+    if (/navigation|routing|link|sheet|popover|alert|actionsheet|tab|sidebar/i.test(allText)) {
+      return 'Navigation';
+    }
+    
+    // Lists & Data Display
+    if (/list|table|collection|grid|foreach|section|row|cell/i.test(allText)) {
+      return 'Lists & Collections';
+    }
+    
+    // State Management
+    if (/@state|@binding|@observedobject|@stateobject|@environmentobject|@published|observable/i.test(allText)) {
+      return 'State Management';
+    }
+    
+    // Layout & Positioning
+    if (/vstack|hstack|zstack|grid|geometry|alignment|padding|frame|spacing/i.test(allText)) {
+      return 'Layout';
+    }
+    
+    // Animations & Transitions
+    if (/animation|transition|spring|easing|keyframe|withanimation|scaleeffect|rotationeffect/i.test(allText)) {
+      return 'Animations';
+    }
+    
+    // Network & Data
+    if (/urlsession|fetch|download|upload|json|codable|api|request|response/i.test(allText)) {
+      return 'Networking';
+    }
+    
+    // Core Data & Persistence
+    if (/coredata|fetch|predicate|managedObject|persistent|@fetchrequest|swiftdata/i.test(allText)) {
+      return 'Data Persistence';
+    }
+    
+    // Graphics & Drawing
+    if (/path|shape|canvas|metal|scenekit|realitykit|arkit|vision|core graphics/i.test(allText)) {
+      return 'Graphics & AR';
+    }
+    
+    // Platform-specific
+    if (/watchos|complication|clockkit|digital crown/i.test(allText)) {
+      return 'watchOS';
+    }
+    if (/visionos|spatial|immersive|window|volume/i.test(allText)) {
+      return 'visionOS';
+    }
+    if (/tvos|focus|remote|directional/i.test(allText)) {
+      return 'tvOS';
+    }
+    
+    // System Integration
+    if (/notification|location|camera|contacts|calendar|health|siri|widget/i.test(allText)) {
+      return 'System Integration';
+    }
+    
+    // Testing & Debugging
+    if (/test|mock|preview|debug|assert|xctassert/i.test(allText)) {
+      return 'Testing';
+    }
+    
+    // Performance & Concurrency
+    if (/async|await|task|actor|concurrent|performance|background|queue/i.test(allText)) {
+      return 'Concurrency';
+    }
+    
+    // Accessibility
+    if (/accessibility|voiceover|dynamic type|reduce motion/i.test(allText)) {
+      return 'Accessibility';
+    }
+    
+    return 'General';
+  }
+  
+  /**
+   * Validate and filter code examples to remove obvious junk
+   * @param {string} code - Code to validate
+   * @param {string} context - Context around code
+   * @returns {boolean} True if code seems valid
+   */
+  isValidCodeExample(code, context) {
+    // Too short to be useful
+    if (code.trim().length < 10) return false;
+    
+    // Just a type declaration without implementation
+    if (/^(class|struct|enum|protocol)\s+\w+.*$/.test(code.trim()) && !code.includes('{')) {
+      return false;
+    }
+    
+    // Only imports
+    if (/^import\s+\w+$/.test(code.trim())) return false;
+    
+    // Only variable declarations without context
+    if (/^(let|var)\s+\w+/.test(code.trim()) && code.split('\n').length === 1 && context.length < 20) {
+      return false;
+    }
+    
+    // Contains too many artifacts
+    const artifactCount = (code.match(/,\s*}/g) || []).length + (code.match(/{\s*,/g) || []).length;
+    if (artifactCount > code.split('\n').length * 0.3) return false;
+    
+    return true;
   }
 
   close() {

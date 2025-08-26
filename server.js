@@ -142,6 +142,8 @@ class AppleSearchMCPServer {
         return this.handleGetDoc(args);
       } else if (name === 'get_stats') {
         return this.handleGetStats(args);
+      } else if (name === 'get_code_examples') {
+        return this.handleGetCodeExamples(args);
       } else {
         throw new Error(`Unknown tool: ${name}`);
       }
@@ -217,6 +219,11 @@ WORKFLOW: Use search_docs for exploration → get_doc for detailed analysis → 
                   type: 'boolean',
                   description: '🔗 VECTOR-BASED AUTO-DISCOVER: Find semantically related documents using embeddings similarity (NOW ENABLED BY DEFAULT). Adds 3-6 intelligently classified docs (🔄 Migration guides, 🆕 Modern alternatives, ⚡ Performance tips, 📋 Code examples). Set to false to show only main results.',
                   default: true
+                },
+                showCodePreview: {
+                  type: 'boolean',
+                  description: '💻 CODE PREVIEW: Show preview of first Swift code block in each result. Perfect for AI agents to quickly see if document contains useful code examples. Use with get_code_examples(docId) for full code extraction.',
+                  default: false
                 }
               },
               required: ['query']
@@ -293,6 +300,38 @@ Quick reference: This database contains comprehensive Apple platform documentati
               properties: {},
               additionalProperties: false
             }
+          },
+          {
+            name: 'get_code_examples', 
+            description: `🔗 CONTEXTUAL CODE EXTRACTION: Extract code examples from a specific document you already found.
+
+WORKFLOW INTEGRATION:
+• Use after search_docs: See codeBlocks: 5 → get_code_examples(doc_id) → get those 5 examples
+• Perfect for AI agents: Found interesting document → extract its code without re-searching
+• Contextual approach: Work with specific documents rather than broad searches
+
+WHAT YOU GET:
+• All code examples from the specified document
+• Full context and explanations around each code block
+• Categorization and complexity analysis
+• Same rich metadata as extract_code_examples
+
+USAGE PATTERN:
+1. search_docs("SwiftUI navigation") → find relevant documents  
+2. See result shows "codeBlocks: 7" 
+3. get_code_examples(document_id) → get all 7 examples with context
+
+PERFECT FOR: AI agents who want to drill down into specific documents after initial search.`,
+            inputSchema: {
+              type: 'object',
+              properties: {
+                docId: {
+                  type: 'string',
+                  description: 'DOCUMENT ID: The id field from search_docs results. Extract code examples from this specific document.'
+                }
+              },
+              required: ['docId']
+            }
           }
         ]
       };
@@ -307,7 +346,8 @@ Quick reference: This database contains comprehensive Apple platform documentati
       minSimilarity = 0.3,
       includeContent = true,
       maxContentChars = 300,
-      includeRelated = true // 🆕 NOW ENABLED BY DEFAULT
+      includeRelated = true, // 🆕 NOW ENABLED BY DEFAULT
+      showCodePreview = false // 🆕 CONTEXTUAL CODE PREVIEW
     } = args;
 
     if (!query || typeof query !== 'string') {
@@ -327,17 +367,79 @@ Quick reference: This database contains comprehensive Apple platform documentati
         `Search: "${query}"`
       );
 
-      const formattedResults = results.map(result => ({
-        id: result.id,
-        title: result.title,
-        url: result.url,
-        similarity: Math.round(result.similarity * 10000) / 100, // Percentage with 2 decimals
-        snippet: includeContent ? 
-          (result.content.length > maxContentChars ? 
-            result.content.substring(0, maxContentChars) + '...' : 
-            result.content
-          ) : null
-      }));
+      const formattedResults = results.map(result => {
+        const baseResult = {
+          id: result.id,
+          title: result.title,
+          url: result.url,
+          similarity: Math.round(result.similarity * 10000) / 100, // Percentage with 2 decimals
+          snippet: includeContent ? 
+            (result.content.length > maxContentChars ? 
+              result.content.substring(0, maxContentChars) + '...' : 
+              result.content
+            ) : null
+        };
+
+        // Add code preview if requested and document has code
+        if (showCodePreview && result.content && result.content.includes('```swift')) {
+          const swiftCodeMatch = result.content.match(/```swift\s*\n([\s\S]*?)\n?\s*```/);
+          if (swiftCodeMatch) {
+            const codePreview = swiftCodeMatch[1].trim();
+            baseResult.codePreview = codePreview.length > 150 ? 
+              codePreview.substring(0, 150) + '...' : 
+              codePreview;
+          }
+        }
+
+        // Add compatibility info if available
+        if (result.compatibility) {
+          const compat = result.compatibility;
+          baseResult.compatibility = {};
+
+          // Platform information
+          if (compat.platforms && compat.platforms.count > 0) {
+            baseResult.compatibility.platforms = {
+              supported: compat.platforms.supported,
+              scope: compat.platforms.universal ? '🌐 Universal' : 
+                     compat.platforms.mobile ? '📱 Mobile' : 
+                     compat.platforms.desktop ? '🖥 Desktop' : 
+                     compat.platforms.spatial ? '👓 Spatial' : '🎯 Limited'
+            };
+          }
+
+          // Technology information
+          if (compat.technologies && compat.technologies.primary) {
+            baseResult.compatibility.technologies = {
+              primary: compat.technologies.primary,
+              modern: compat.technologies.isModern ? '✅ Modern (SwiftUI)' : 
+                      compat.technologies.isLegacy ? '⚠️ Legacy (UIKit)' : null
+            };
+          }
+
+          // Requirements
+          if (compat.requirements && Object.keys(compat.requirements).length > 0) {
+            baseResult.compatibility.requirements = compat.requirements;
+          }
+
+          // Limitations
+          if (compat.limitations && compat.limitations.length > 0) {
+            baseResult.compatibility.limitations = compat.limitations;
+          }
+
+          // Deprecation warning
+          if (compat.deprecation) {
+            baseResult.deprecationWarning = {
+              status: compat.deprecation.status === 'deprecated' ? '⚠️ Deprecated API' : 
+                      compat.deprecation.status === 'superseded' ? '📄 Has Modern Alternative' :
+                      '🔄 Migration Available',
+              confidence: compat.deprecation.confidence,
+              evidence: compat.deprecation.evidence
+            };
+          }
+        }
+
+        return baseResult;
+      });
 
       let response = {
         query: query,
@@ -497,6 +599,38 @@ Quick reference: This database contains comprehensive Apple platform documentati
               model: 'text-embedding-3-large',
               dimensions: 3072,
               sampleTitles: stats.sampleTitles
+            }, null, 2)
+          }
+        ]
+      };
+    });
+  }
+
+  // Contextual code examples extraction from specific document
+  async handleGetCodeExamples(args) {
+    const { docId } = args;
+
+    if (!docId || typeof docId !== 'string') {
+      throw new Error('Parameter docId is required and must be a string');
+    }
+
+    return this.sqliteQueue(async () => {
+      const engine = await this.initializeEngine();
+      
+      const examples = await this.withTimeout(
+        () => engine.extractCodeFromDocument(docId),
+        15000, // Faster than full search since working with one document
+        `Extract code from document: ${docId}`
+      );
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              docId: docId,
+              total: examples.length,
+              examples: examples
             }, null, 2)
           }
         ]

@@ -1,6 +1,6 @@
 {
   "name": "apple-docs-mcp-server",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "🍎 MCP server for semantic search through Apple developer documentation, WWDC transcripts, and code examples. 16K+ documents indexed for AI agents.",
   "type": "module",
   "main": "server.js",
@@ -35,6 +35,7 @@
   "files": [
     "server.js",
     "search.js",
+    "compatibility-analyzer.js",
     "postinstall.js",
     "run-mcp-safe.sh",
     ".env.example",
